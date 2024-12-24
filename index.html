@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý JSON</title>
+</head>
+<body>
+    <h1>Quản lý JSON</h1>
+    <h2>Thêm / Xóa tên và tuổi</h2>
+    <form id="addForm">
+        <input type="text" id="name" placeholder="Nhập tên" required>
+        <input type="number" id="age" placeholder="Nhập tuổi" required>
+        <button type="submit">Thêm</button>
+    </form>
+    <ul id="userList"></ul>
+
+    <h2>Bạn có muốn đi ăn tối không?</h2>
+    <button id="agreeButton">Đồng ý</button>
+    <button id="disagreeButton">Không đồng ý</button>
+    <script src="firebase.js"></script>
+
+    <script>
+        // Lấy dữ liệu và hiển thị
+        async function fetchData() {
+            const response = await fetch('/data');
+            const data = await response.json();
+            renderData(data);
+        }
+
+        // Hiển thị dữ liệu
+        function renderData(data) {
+            const userList = document.getElementById('userList');
+            userList.innerHTML = '';
+            data.users.forEach((user, index) => {
+                const li = document.createElement('li');
+                li.innerHTML = `${user.name} (${user.age} tuổi) 
+                    <button onclick="deleteUser(${index})">Xóa</button>`;
+                userList.appendChild(li);
+            });
+        }
+
+        // Thêm người dùng
+        document.getElementById('addForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const name = document.getElementById('name').value;
+            const age = document.getElementById('age').value;
+            await fetch('/add', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, age }),
+            });
+            alert('Đã thêm người dùng!');
+            fetchData();
+        });
+
+        // Xóa người dùng
+        async function deleteUser(index) {
+            await fetch(`/delete/${index}`, { method: 'DELETE' });
+            alert('Đã xóa người dùng!');
+            fetchData();
+        }
+
+        // Xử lý đồng ý / không đồng ý
+        document.getElementById('agreeButton').addEventListener('click', async () => {
+            await fetch('/response', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ response: 'Đồng ý' }),
+            });
+            alert('Bạn đã chọn: Đồng ý');
+        });
+
+        document.getElementById('disagreeButton').addEventListener('click', async () => {
+            await fetch('/response', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ response: 'Không đồng ý' }),
+            });
+            alert('Bạn đã chọn: Không đồng ý');
+        });
+
+        // Lấy dữ liệu ban đầu
+        fetchData();
+    </script>
+
+    <script>
+        // Import the functions you need from the SDKs you need
+import { initializeApp } from "firebase/app";
+import { getAnalytics } from "firebase/analytics";
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
+
+// Your web app's Firebase configuration
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const firebaseConfig = {
+  apiKey: "AIzaSyAkId0fJU5COVKLhVIAONa1kx5G7C5lT3g",
+  authDomain: "bai-test-101c1.firebaseapp.com",
+  projectId: "bai-test-101c1",
+  storageBucket: "bai-test-101c1.firebasestorage.app",
+  messagingSenderId: "383802402251",
+  appId: "1:383802402251:web:4494779705419aea74024e",
+  measurementId: "G-LG1QYDNCLZ"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);
+    </script>
+</body>
+</html>
